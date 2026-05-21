@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ThinkNote — Organize Your Thoughts</title>
+  <meta name="description" content="A minimal AI-powered thought organizer that maps your ideas into a connected tree."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,400&display=swap"/>
+  <link rel="stylesheet" href="style.css"/>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- Marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+<div id="loader" class="app-loader">
+  <svg class="logo-mark pulse-logo" viewBox="0 0 28 28" fill="none">
+    <circle cx="14" cy="6"  r="3.5" fill="currentColor"/>
+    <circle cx="6"  cy="22" r="3"   fill="currentColor" opacity=".65"/>
+    <circle cx="22" cy="22" r="3"   fill="currentColor" opacity=".65"/>
+    <path d="M14 9.5 L6 19"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M14 9.5 L22 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+</div>
+<div id="app">
+
+  <!-- Recent Panel -->
+  <aside class="recent-panel" id="recent-panel">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <i data-lucide="notebook-text" class="panel-icon"></i>
+        <span class="panel-title">Recent</span>
+      </div>
+      <button class="ib" id="collapse-btn" title="Collapse sidebar">
+        <i data-lucide="panel-left-close"></i>
+      </button>
+    </div>
+    <div class="panel-body">
+      <button class="new-note-btn" id="new-note-btn" title="New ThinkNote (⌘N)">
+        <span class="nb-icon"><i data-lucide="square-pen"></i></span>
+        <span class="nb-label">New ThinkNote</span>
+        <span class="nb-logo">
+          <svg class="logo-mark" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="6"  r="3.5" fill="currentColor"/>
+            <circle cx="6"  cy="22" r="3"   fill="currentColor" opacity=".65"/>
+            <circle cx="22" cy="22" r="3"   fill="currentColor" opacity=".65"/>
+            <path d="M14 9.5 L6 19"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M14 9.5 L22 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+      </button>
+      <div class="sessions-list" id="sessions-list"></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main id="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="tb-left">
+        <button class="ib hidden" id="expand-btn" title="Show sidebar">
+          <i data-lucide="panel-left-open"></i>
+        </button>
+        <!-- Logo -->
+        <div class="logo">
+          <svg class="logo-mark" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="6"  r="3.5" fill="currentColor"/>
+            <circle cx="6"  cy="22" r="3"   fill="currentColor" opacity=".65"/>
+            <circle cx="22" cy="22" r="3"   fill="currentColor" opacity=".65"/>
+            <path d="M14 9.5 L6 19"  stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            <path d="M14 9.5 L22 19" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+          <span class="logo-name">ThinkNote</span>
+        </div>
+        <div class="divv"></div>
+        <span class="session-title" id="session-title" contenteditable="true" spellcheck="false">Untitled Note</span>
+      </div>
+
+      <div class="tb-right">
+        <!-- Export -->
+        <div class="export-wrap">
+          <button class="ib" id="export-btn" title="Export">
+            <i data-lucide="download"></i>
+          </button>
+          <div class="dropdown hidden" id="export-menu">
+            <button class="dd-item" id="export-txt">
+              <i data-lucide="file-text"></i>
+              <span>Export as TXT</span>
+            </button>
+            <button class="dd-item" id="export-docx">
+              <i data-lucide="file-type-2"></i>
+              <span>Export as DOCX</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Theme -->
+        <button class="ib" id="theme-btn" title="Toggle theme">
+          <i data-lucide="moon"  id="icon-moon"></i>
+          <i data-lucide="sun"   id="icon-sun" class="hidden"></i>
+        </button>
+
+        <!-- Settings -->
+        <button class="ib" id="settings-btn" title="Settings">
+          <i data-lucide="sliders-horizontal"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Document view -->
+    <div id="doc-wrap">
+      <!-- Empty state -->
+      <div class="tree-empty" id="tree-empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 28 28" fill="none" width="22" height="22">
+            <circle cx="14" cy="6"  r="3.5" fill="currentColor"/>
+            <circle cx="6"  cy="22" r="3"   fill="currentColor" opacity=".5"/>
+            <circle cx="22" cy="22" r="3"   fill="currentColor" opacity=".5"/>
+            <path d="M14 9.5 L6 19"  stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            <path d="M14 9.5 L22 19" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="empty-title">Start thinking</p>
+        <p class="empty-sub">Type a thought below and press Enter. ThinkNote will organise your ideas into a connected tree as you write.</p>
+      </div>
+      <!-- Thought rows rendered here -->
+      <div id="doc-view"></div>
+    </div>
+
+    <!-- Chat bar -->
+    <div class="chat-bar">
+      <div class="chat-inner">
+        <div class="ai-pip" id="ai-pip" title="AI not configured"></div>
+        <label class="ask-toggle" title="Auto-answer detected questions with AI">
+          <input type="checkbox" id="ask-toggle-chk" />
+          <i data-lucide="bot"></i>
+          <span>Ask AI</span>
+        </label>
+        <textarea id="thought-input" rows="1"
+          placeholder="Type a thought… (Enter to send · Shift+Enter for new line)"
+          maxlength="1200"></textarea>
+        <button class="send-btn" id="send-btn" title="Send thought">
+          <i data-lucide="arrow-up"></i>
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Ask Panel -->
+  <aside class="ask-panel collapsed" id="ask-panel">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <i data-lucide="bot" class="panel-icon"></i>
+        <span class="panel-title">Answers</span>
+      </div>
+      <button class="ib" id="close-ask-panel" title="Close answers panel">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="panel-body ask-body" id="ask-body">
+      <!-- Answers go here -->
+    </div>
+  </aside>
+
+  <!-- Settings Drawer -->
+  <div class="ovl hidden" id="ovl"></div>
+  <aside class="settings-drawer" id="settings-drawer">
+    <div class="panel-hd">
+      <div class="panel-hd-left">
+        <i data-lucide="sliders-horizontal" style="width:14px;height:14px"></i>
+        <span class="panel-title">Settings</span>
+      </div>
+      <button class="ib" id="close-settings" title="Close settings"><i data-lucide="x"></i></button>
+    </div>
+    <div class="set-body">
+      <div class="set-sec">
+        <label class="set-lbl"><i data-lucide="cpu"></i>Provider</label>
+        <select class="field" id="provider-sel">
+          <option value="none">None — offline mode</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="ollama">Ollama (local)</option>
+          <option value="lmstudio">LM Studio (local)</option>
+          <option value="custom">Custom OpenAI-compatible</option>
+        </select>
+      </div>
+      <div class="set-sec" id="sec-key">
+        <label class="set-lbl"><i data-lucide="key-round"></i>API Key</label>
+        <input type="password" class="field" id="api-key" placeholder="sk-…" autocomplete="off"/>
+      </div>
+      <div class="set-sec" id="sec-url">
+        <label class="set-lbl"><i data-lucide="link"></i>Base URL</label>
+        <input type="text" class="field" id="base-url" placeholder="http://localhost:11434/v1"/>
+        <p class="field-hint">Ollama: <code>http://localhost:11434/v1</code><br>LM Studio: <code>http://localhost:1234/v1</code></p>
+      </div>
+      <div class="set-sec">
+        <label class="set-lbl"><i data-lucide="box"></i>Model</label>
+        <input type="text" class="field" id="model-name" placeholder="gpt-4o-mini, llama3, claude-3-haiku…"/>
+      </div>
+      <div class="set-sec">
+        <label class="set-lbl"><i data-lucide="type"></i>Note Font</label>
+        <select class="field" id="note-font-sel">
+          <option value="source-serif">Source Serif 4 (calm)</option>
+          <option value="dm-sans">DM Sans (clean)</option>
+          <option value="georgia">Georgia (classic)</option>
+          <option value="mono">Monospace</option>
+        </select>
+      </div>
+      <div class="set-actions">
+        <button class="ib set-action-btn" id="test-btn" title="Test connection">
+          <i data-lucide="zap"></i>
+        </button>
+        <button class="ib set-action-btn" id="save-btn" title="Save settings">
+          <i data-lucide="check"></i>
+        </button>
+      </div>
+      <p class="conn-msg" id="conn-msg"></p>
+    </div>
+  </aside>
+
+  <div id="toasts"></div>
+</div>
+
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+<script src="state.js"></script>
+<script src="ai.js"></script>
+<script src="layout.js"></script>
+<script src="render.js"></script>
+<script src="export.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
