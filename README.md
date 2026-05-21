@@ -2,6 +2,10 @@
 
 > A premium, minimalist, AI-powered thought organizer that elegantly maps your ideas into a connected tree structure. Designed for distraction-free note-taking, dynamic branching, and intelligent organization.
 
+### 🌐 Live Demo
+Experience the application live: **[thinknote-donut-7b9227.netlify.app](https://thinknote-donut-7b9227.netlify.app/)**
+
+
 ---
 
 ## ✨ Features
